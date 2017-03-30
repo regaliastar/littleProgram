@@ -26,8 +26,8 @@ Boolean.prototype.toNum = function(){
 
 //原函数 y=x^2
 var fx = function(x){
-	if(!x){
-		throw new Error('输入不能为空');
+	if(arguments.length == 0){
+		throw new Error('fx输入不能为空');
 	}
 	return x*x;
 }
@@ -90,26 +90,46 @@ var sex = function(a,b){
 /**
  *自然选择函数
  *根据适应函数fitness 计算出每个个体被自然选择的概率，利用轮盘法则加以选择
- *输入六个后代，选出四个优秀后代
+ *输入12个后代，选出四个优秀后代
  */
 var choose = function(args){
-	if(arguments.length != 1){
-		throw new Error('必须输入数组');
+	if(Object.prototype.toString.call(args) !== '[object Array]'){
+		throw new Error('choose函数必须输入数组');
 	}
 
-	var items = [];
-	//开始选择,升序排列
+	var items = [],
+		selected = [],
+		sum = 0,
+		pro = [];
+	//升序排列
 	args.sort(function(a,b){
 		return a-b;
 	});
-
+	args.map(function(item){
+		sum += fitness(item);
+	});
+	args.map(function(item){
+		var p = fitness(item)/sum;
+		pro.push({'p':p,'value':item});
+	});
+	//轮盘法开始选择
 	for(var i=0;i<4;i++){
-		var item = args.pop();
+		var rand = Math.random();
+		var index = pro.length-1;
+		for(var j=0;j<pro.length;j++){
+			if(rand <= pro[j].p){
+				index = j;
+				break;
+			}
+		}
+		var item = pro[index].value;
+		pro.splice(index,1);
 		items.push(item);
 	}
 
 	return items;
 }
+
 
 /**
  *管理步骤
@@ -154,9 +174,9 @@ var step = (function(){
  var start = (function(){
  	//初始值，用二进制表示，任意选取
 	var x1 = '10101'.is2(),
-	x2 = '11011'.is2(),
-	x3 = '00101'.is2(),
-	x4 = '01000'.is2();
+	x2 = '11010'.is2(),
+	x3 = '00111'.is2(),
+	x4 = '01011'.is2();
 
  	return function(){
  		var args = step.init(x1,x2,x3,x4);
